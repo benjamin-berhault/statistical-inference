@@ -1,5 +1,4 @@
 # Statistical Inference
-https://www.coursera.org/course/statinference
 [Johns Hopkins : Statistical Inference](https://www.coursera.org/course/statinference)
 
 ### Part of the Data Science Specialization »

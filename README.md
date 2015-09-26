@@ -10,5 +10,5 @@ Learn how to draw conclusions about populations or scientific truths from data. 
 
 #### Project reports on Rpubs
 
-* 1/2 - Investigation of the exponential distribution in R : [rpubs.com/BenDataGeek/MotorTrendAnalysis](http://rpubs.com/BenDataGeek/MotorTrendAnalysis)
-* 2/2 - Analysis of the ToothGrowth datasets : [rpubs.com/BenDataGeek/MotorTrendAnalysis](http://rpubs.com/BenDataGeek/MotorTrendAnalysis)
+* Part 1 : [Investigation of the exponential distribution in R](http://rpubs.com/BenDataGeek/MotorTrendAnalysis)
+* Part 2 : [Analysis of the ToothGrowth datasets](http://rpubs.com/BenDataGeek/MotorTrendAnalysis)

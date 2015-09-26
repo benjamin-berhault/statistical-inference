@@ -1,0 +1,150 @@
+---
+title : "Johns Hopkins - Statistical inference"
+author: "Benjamin Berhault"
+date : September 12, 2015
+---
+
+```{r global_options, include=FALSE}
+library(knitr)
+opts_chunk$set(fig.width=7, fig.height=4, warning=FALSE, message=FALSE)
+```
+## Basic inferential data analysis - Peer Assessment 2/2
+
+#### Synopsis
+We're going to analyze the ToothGrowth data in the R datasets package. In this dataset, the length of teeth is examined for 10 pigs at three Dose levels of two different supplements. The supplements are orange juice (OJ) or ascorbic acid (VC) which contain high level of Vitamin C.
+
+#### URL
+* [Coursera - Johns Hopkins : Statistical Inference](https://class.coursera.org/statinference-032/)
+* Code source can be found here : [github.com/benjamin-berhault/statistical-inference](https://github.com/benjamin-berhault/statistical-inference)
+
+#### Mission
+1. Load the ToothGrowth data and perform some basic exploratory data analyses 
+2. Provide a basic summary of the data.
+3. Use confidence intervals and/or hypothesis tests to compare tooth growth by Supplement and Dose. (Only use the techniques from class, even if there's other approaches worth considering)
+4. State your conclusions and the assumptions needed for your conclusions.  
+
+#### Environment prepration...
+```{r}
+## clear environment variable
+rm(list=ls(all=TRUE))
+
+# load necessary library
+library(datasets)
+library(ggplot2)
+library(gridExtra)
+library(GGally)
+library(data.table)
+```
+## 1. Load the ToothGrowth data and perform some basic exploratory data analyses 
+
+#### Data loading
+
+```{r}
+# The Effect of Vitamin C on Tooth Growth in Guinea Pigs
+data(ToothGrowth)
+toothGrowth <- data.table(ToothGrowth) 
+setnames(toothGrowth, c('len','supp','dose'),c('Length','Supplement','Dose'))
+toothGrowth$Dose <- as.factor(toothGrowth$Dose) # convert to factor
+```
+
+
+#### Basic Summary of the data
+```{r}
+str(toothGrowth)
+summary(toothGrowth)
+head(toothGrowth)
+```
+#### Contingency table
+```{r}
+table(toothGrowth$Supplement, toothGrowth$Dose)
+```
+## 2. Provide a basic summary of the data.
+
+#### Dose comparison
+```{r echo=FALSE}
+p1 <- ggplot(data=toothGrowth, aes(x=Dose,y=Length,fill=Dose)) +
+  geom_boxplot() + 
+  theme(legend.position="none") + 
+  facet_grid(.~Supplement)
+
+p2 <- ggplot(data=toothGrowth, aes(x=Supplement,y=Length,fill=Supplement)) +
+  geom_boxplot() + 
+  theme(legend.position="none") + 
+  facet_grid(.~Dose) 
+```
+#### Supplements comparison
+```{r echo=FALSE}
+p3 <- ggplot(data=toothGrowth, aes(x=Supplement,y=Length,fill=Supplement)) +
+  geom_boxplot()
+
+p4 <- ggplot(data=toothGrowth, aes(x=Dose,y=Length,fill=Dose)) +
+  geom_boxplot()
+
+grid.arrange(p1, p4, p2, p3, ncol = 2, nrow=2)
+
+```
+
+## 3. Use confidence intervals and/or hypothesis tests to compare tooth growth by Supplement and Dose. (Only use the techniques from class, even if there's other approaches worth considering)
+
+```{r}
+dataVC <- toothGrowth[toothGrowth$Supplement=='VC',]
+dataOJ <- toothGrowth[toothGrowth$Supplement=='OJ',]
+lengthComparison <- (dataOJ$Length - dataVC$Length)
+comp_data <- data.frame(lengthComparison, dataOJ$Dose)
+names(comp_data) <- c("lengthComparison", "Dose")
+```
+Now, we have 2 subsets by kind of supplement tested :
+
+* orange juice (dataVC) 
+* ascorbic acid (dataVC)
+
+### Dose : 0.5 mg
+
+```{r}
+n <- subset(comp_data, Dose == 0.5)$lengthComparison
+t.test(n)$conf
+```
+The confidence interval $[1.26;9.2]$ does not include zero, indicating that we should reject the null hypothesis that there is no difference between OJ and VC using a 0.5 mg dose, in favour of the alternative that there is a difference.
+
+### Dose : 1 mg
+
+```{r}
+n <- subset(comp_data, Dose == 1)$lengthComparison
+t.test(n)$conf
+```
+The confidence interval $[1.95;0.9]$ does not include zero, indicating that we should reject the null hypothesis that there is no difference between OJ and VC using a 1.0 mg dose, in favour of the alternative that there is a difference.
+
+### Dose : 2 mg
+
+```{r}
+n <- subset(comp_data, Dose == 2)$lengthComparison
+t.test(n)$conf
+```
+The confidence interval is both positive and negative meaning that the two methods have similar effectiveness at dose == 2.0.
+
+### Analysis based on Analysis of Variance (ANOVA)
+```{r}
+anova.out <- aov(Length ~ Supplement * Dose, data=toothGrowth)
+summary(anova.out)
+```
+
+* The results show a strong relationship between the length of teeth and dosage ($p-value < 2^{-16} < 0.01$)
+* Also a very clear effect on length by supplement type ($p-value < 0.000231 < 0.01$). 
+* Finally, a minor interaction between the combination of supplement type and dosage compared to the length ($p-value < 0.021860 < 0.05$).
+
+
+#### Table means (Supplement x Dose)
+```{r}
+print(model.tables(anova.out,"means"),digits=3)
+```
+
+## 4. State your conclusions and the assumptions needed for your conclusions.  
+
+We see clearly that each drugs have an effect concerning the pig teeth length. A greater quantity increase the size significantly. There is some kind of difference between the 2 drugs. 0.5 mg and 1 mg, orange juice supplements seems having a greater impact but the effect become similar for a quantity of 2 mg.
+
+These assumptions are based on the facts :
+
+* the guinea pigs are representative for the population of guinea pigs,
+* dosage and supplement were randomly assigned
+
+
